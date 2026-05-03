@@ -1,18 +1,24 @@
-import sqlite3
+import psycopg2
+import os
 
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# If running locally, paste your Railway DATABASE_URL manually:
+# DATABASE_URL = "postgresql://user:password@host:port/dbname"
+
+conn = psycopg2.connect(DATABASE_URL)
+cur = conn.cursor()
 
 print("USERS:")
-for row in cursor.execute("SELECT * FROM users"):
-    print(row)
+cur.execute("SELECT * FROM users;")
+print(cur.fetchall())
 
 print("\nPROJECTS:")
-for row in cursor.execute("SELECT * FROM projects"):
-    print(row)
+cur.execute("SELECT * FROM projects;")
+print(cur.fetchall())
 
 print("\nTASKS:")
-for row in cursor.execute("SELECT * FROM tasks"):
-    print(row)
+cur.execute("SELECT * FROM tasks;")
+print(cur.fetchall())
 
 conn.close()
