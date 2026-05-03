@@ -1,0 +1,62 @@
+# Team Task Manager (Flask App)
+
+A simple web-based Task Management system built using Flask. It allows users to create, view, update, and manage tasks efficiently.
+
+## Project Structure
+
+app.py → Main Flask application entry point  
+config.py → Configuration settings (DB, secrets, etc.)  
+database.py → Database connection and helper functions  
+schema.sql → Database schema (tables setup)  
+templates/ → HTML templates (Flask Jinja2)  
+static/ → CSS, JS, images  
+venv/ → Virtual environment (NOT for deployment)  
+requirements.txt → Python dependencies (must be created)
+
+## Features
+
+- Create new tasks  
+- View all tasks  
+- Update task status  
+- Delete tasks  
+- Database integration (SQLite/PostgreSQL depending on config)
+
+## Setup
+
+git clone <your-repo-url>  
+cd team-task-manager  
+
+python -m venv venv  
+
+Windows:  
+venv\Scripts\activate  
+
+Mac/Linux:  
+source venv/bin/activate  
+
+pip install -r requirements.txt  
+
+## Database Setup
+
+python database.py  
+
+## Run Project
+
+python app.py  
+
+Open: http://127.0.0.1:5000/
+
+## Notes
+
+- Do NOT upload venv/  
+- Use requirements.txt for dependencies  
+- Use environment variables for sensitive data  
+- Works on Railway / Render / AWS
+
+## Tech Stack
+
+Python, Flask, HTML, CSS, SQL
+
+## Author
+
+Your Name
