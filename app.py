@@ -1,58 +1,65 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
-import config
+import os
 
 app = Flask(__name__)
-app.secret_key = config.SECRET_KEY
+app.secret_key = "secret123"
 
 
-# ---------------- DATABASE INIT (FIXED FOR RAILWAY) ----------------
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
-
-# Create tables if not exist
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    password TEXT,
-    role TEXT
-)
-""")
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    created_by INTEGER
-)
-""")
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
-    status TEXT,
-    assigned_to INTEGER,
-    project_id INTEGER
-)
-""")
-
-# Insert admin only once
-cursor.execute("SELECT * FROM users WHERE username='admin'")
-if not cursor.fetchone():
-    cursor.execute(
-        "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
-        ("admin", "123", "admin")
-    )
-
-conn.commit()
-conn.close()
-# ------------------------------------------------------------------
-
+# ---------------- DATABASE ----------------
+DATABASE = "database.db"
 
 def get_db():
-    return sqlite3.connect(config.DATABASE)
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# ---------------- INIT DB ----------------
+def init_db():
+    db = get_db()
+
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        password TEXT,
+        role TEXT
+    )
+    """)
+
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS projects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        created_by INTEGER
+    )
+    """)
+
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        status TEXT,
+        assigned_to INTEGER,
+        project_id INTEGER
+    )
+    """)
+
+    # Insert admin only once
+    user = db.execute("SELECT * FROM users WHERE username='admin'").fetchone()
+    if not user:
+        db.execute(
+            "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+            ("admin", "123", "admin")
+        )
+
+    db.commit()
+    db.close()
+
+
+# Run DB init when app starts
+init_db()
 
 
 # ---------------- LOGIN ----------------
@@ -69,7 +76,7 @@ def login():
         ).fetchone()
 
         if result:
-            session["user_id"] = result[0]
+            session["user_id"] = result["id"]
             return redirect("/dashboard")
 
     return render_template("login.html")
@@ -89,6 +96,7 @@ def register():
             )
         )
         db.commit()
+        db.close()
         return redirect("/")
 
     return render_template("register.html")
@@ -99,6 +107,7 @@ def register():
 def dashboard():
     db = get_db()
     tasks = db.execute("SELECT * FROM tasks").fetchall()
+    db.close()
     return render_template("dashboard.html", tasks=tasks)
 
 
@@ -112,6 +121,7 @@ def create_project():
             (request.form["name"], session["user_id"])
         )
         db.commit()
+        db.close()
         return redirect("/dashboard")
 
     return render_template("create_project.html")
@@ -133,10 +143,12 @@ def create_task():
             )
         )
         db.commit()
+        db.close()
         return redirect("/dashboard")
 
     users = db.execute("SELECT * FROM users").fetchall()
     projects = db.execute("SELECT * FROM projects").fetchall()
+    db.close()
 
     return render_template("create_task.html", users=users, projects=projects)
 
@@ -147,9 +159,29 @@ def update(id):
     db = get_db()
     db.execute("UPDATE tasks SET status='done' WHERE id=?", (id,))
     db.commit()
+    db.close()
     return redirect("/dashboard")
+
+
+# ---------------- DEBUG ROUTE (VERY IMPORTANT) ----------------
+@app.route("/debug")
+def debug():
+    db = get_db()
+    users = db.execute("SELECT * FROM users").fetchall()
+    projects = db.execute("SELECT * FROM projects").fetchall()
+    tasks = db.execute("SELECT * FROM tasks").fetchall()
+    db.close()
+
+    return f"""
+    USERS: {users}
+    <br><br>
+    PROJECTS: {projects}
+    <br><br>
+    TASKS: {tasks}
+    """
 
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
