@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Task</title>
+</head>
+<body>
+
+    <h2>Create Task</h2>
+
+    <form method="POST">
+        <label>Task Title:</label><br>
+        <input type="text" name="title" required><br><br>
+
+        <label>Assign To:</label><br>
+        <select name="assigned_to">
+            {% for u in users %}
+                <option value="{{ u[0] }}">{{ u[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Project:</label><br>
+        <select name="project_id">
+            {% for p in projects %}
+                <option value="{{ p[0] }}">{{ p[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <button type="submit">Create Task</button>
+    </form>
+
+    <br>
+    <a href="/dashboard">⬅ Back to Dashboard</a>
+
+</body>
+</html>

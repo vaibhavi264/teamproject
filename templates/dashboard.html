@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+
+    <h2>Dashboard</h2>
+
+    <a href="/create_project">➕ Create Project</a> |
+    <a href="/create_task">📝 Create Task</a> |
+    <a href="/">Logout</a>
+
+    <br><br>
+
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        {% for t in tasks %}
+        <tr>
+            <td>{{ t[0] }}</td>
+            <td>{{ t[1] }}</td>
+            <td>
+                {% if t[2] == 'done' %}
+                    ✅ Done
+                {% else %}
+                    ⏳ Pending
+                {% endif %}
+            </td>
+            <td>
+                {% if t[2] != 'done' %}
+                    <a href="/update/{{ t[0] }}">Mark Done</a>
+                {% else %}
+                    ---
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
