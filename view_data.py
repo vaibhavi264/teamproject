@@ -1,6 +1,6 @@
 import psycopg2
 
-DATABASE_URL = "postgresql://postgres:password@containers-us-west-xx.railway.app:6543/railway"
+DATABASE_URL = "postgresql://postgres:password@containers-us-west-xx.railway.app:5432/railway"
 
 conn = psycopg2.connect(DATABASE_URL, sslmode="require")
 cur = conn.cursor()
